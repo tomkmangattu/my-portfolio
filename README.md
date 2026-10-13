@@ -6,6 +6,7 @@ Built with Next.js, React, TypeScript, and Tailwind CSS.
 
 ```bash
 npm install
+nvm use 22.22.0  
 npm run dev
 ```
 

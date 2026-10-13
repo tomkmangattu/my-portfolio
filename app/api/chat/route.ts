@@ -1,6 +1,9 @@
 
-const OLLAMA_URL = "http://localhost:11434/api/chat"
-const MODEL = "llama3.2:3b"
+// const OLLAMA_URL_LOCAL = "http://localhost:11434/api/chat"
+// const MODEL = "llama3.2:3b"
+const OLLAMA_URL = "https://ollama.com/api/chat"
+const MODEL = "gemma4:31b"
+const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY
 
 const RESUME = `TOM K MANGATTU
 Full Stack Engineer | +91 9539638673 | tomkmangattu@gmail.com
@@ -70,7 +73,11 @@ const SYSTEM_PROMPT = `You are Tom’s portfolio assistant for recruiters. Answe
 
 Profile:` + RESUME;
 
+
 export async function POST(request: Request) {
+    const ollama_headers = new Headers();
+    ollama_headers.set("Content-Type", "application/json");
+    ollama_headers.set("Authorization", `Bearer ${OLLAMA_API_KEY}`);
     const {message} = await request.json()
     const llmData = {
         model: MODEL, 
@@ -78,16 +85,31 @@ export async function POST(request: Request) {
             {role: "system", content: SYSTEM_PROMPT},
             {role: "user", content: message}
         ],
-        stream: false}
-    const response = await fetch(OLLAMA_URL, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(llmData)
-    })
-    if(!response.ok){
-        console.log(response)
-        return Response.error()
+        stream: false,
+        think: false
     }
-    const data = await response.json()
-    return Response.json({reply : data.message.content})
+    
+    try {
+        const response = await fetch(OLLAMA_URL, {
+            method: "POST",
+            headers: ollama_headers,
+            body: JSON.stringify(llmData)
+        })
+        if(!response.ok){
+            const errorBody = await response.text()
+            console.error("Ollama error:", response.status, errorBody)
+            return Response.json(
+                { error: "The AI service could not complete the request" },
+                { status: 502 }
+            )
+        }
+        const data = await response.json()
+        return Response.json({reply : data.message.content})
+    } catch {
+        console.error("Ollama request failed or returned an invalid response")
+        return Response.json(
+            { error: "The AI service is unavailable" },
+            { status: 502 }
+        )
+    }
 }
