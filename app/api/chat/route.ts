@@ -76,7 +76,6 @@ Profile:` + RESUME;
 
 export async function POST(request: Request) {
     if (!OLLAMA_API_KEY) {
-        console.error("OLLAMA_API_KEY is not set")
         return Response.json({ error: "The AI service is not configured" }, { status: 500 })
     }
     const ollama_headers = new Headers();
