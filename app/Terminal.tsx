@@ -30,8 +30,12 @@ class TerminalOutput extends TerminalItem{
 type HistoryItem = TerminalInput | TerminalOutput;
 
 export default function Terminal(){
+    const defaultHistory :  HistoryItem[] = [
+        new TerminalOutput("welcome", "Welcome to Tom's portfolio. Ask me anything about Tom's experience or projects. \nTry asking:\n  - What projects have he built? or What is your work experience?"),
+    ]
+
     const [command, setCommand] = useState("");
-    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [history, setHistory] = useState<HistoryItem[]>(defaultHistory);
     const historyRef = useRef<HTMLDivElement>(null);
     const [isRespPending, setRespPending] = useState(false)
 
@@ -90,7 +94,11 @@ export default function Terminal(){
 
   return (
     <div className="flex flex-col w-full h-full rounded-lg overflow-hidden font-mono">
-        <header className="shrink-0 bg-menu_bg p-10"></header>
+        <div className="relative flex items-center w-full bg-menu_bg px-3 py-6">
+            <header className="pointer-events-none absolute inset-x-0 text-center text-sm text-white/80">guest@tom-portfolio</header>
+            <WindowControls/>
+        </div>
+        
         <div className="flex flex-col flex-1 min-h-0 bg-os_bg/90 p-1">
             <div ref={historyRef} className="min-h-0 overflow-y-auto">
                 <div>
@@ -103,6 +111,23 @@ export default function Terminal(){
         </div>
     </div>
   )
+}
+
+function WindowControls(){
+    const base = "flex size-6 items-center justify-center rounded-full text-white"
+    return (
+        <div className="relative ml-auto flex items-center gap-2">
+            <button type="button" aria-label="Minimize" className={`${base} bg-white/10 hover:bg-white/20`}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M1 8h8"/></svg>
+            </button>
+            <button type="button" aria-label="Maximize" className={`${base} bg-white/10 hover:bg-white/20`}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="1" y="1" width="8" height="8"/></svg>
+            </button>
+            <button type="button" aria-label="Close" className={`${base} bg-ubuntu_orange hover:brightness-110`}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M1 1l8 8M9 1L1 9"/></svg>
+            </button>
+        </div>
+    )
 }
 
 type TerminalFormProps = { command: string; onCommandChange: (value: string) => void; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; };
